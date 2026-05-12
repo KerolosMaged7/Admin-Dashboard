@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Search, ChevronRight } from 'lucide-react'
-import { usersData } from '../data'
+import { useAdminData } from '../context/useAdminData'
 
 const statusStyles = {
   active:   'bg-emerald-50 text-emerald-600',
@@ -14,10 +14,11 @@ const statusDot = {
   inactive: 'bg-gray-300',
 }
 
-export default function UsersTable() {
+export default function UsersTable({ onViewAll }) {
   const [search, setSearch] = useState('')
+  const { users } = useAdminData()
 
-  const filtered = usersData.filter(
+  const filtered = users.filter(
     (u) =>
       u.name.toLowerCase().includes(search.toLowerCase()) ||
       u.email.toLowerCase().includes(search.toLowerCase())
@@ -30,7 +31,7 @@ export default function UsersTable() {
           <h3 className="font-display font-semibold text-sm text-[#1a1d2e]">Users</h3>
           <p className="text-[11px] text-gray-400 mt-0.5">Recent account activity</p>
         </div>
-        <button className="text-[12px] text-indigo-500 font-medium flex items-center gap-0.5 hover:text-indigo-700 transition-colors">
+        <button onClick={onViewAll} className="text-[12px] text-indigo-500 font-medium flex items-center gap-0.5 hover:text-indigo-700 transition-colors">
           View all <ChevronRight size={13} />
         </button>
       </div>

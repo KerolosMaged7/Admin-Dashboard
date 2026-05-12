@@ -21,13 +21,16 @@ const colorMap = {
   },
 }
 
-export default function KpiCard({ label, value, change, up, icon, color, delay }) {
+export default function KpiCard({ label, value, change, up, icon, color, delay, onClick }) {
   const Icon = iconMap[icon]
   const c = colorMap[color]
 
   return (
     <div
-      className={`glass rounded-2xl p-5 relative overflow-hidden animate-fade-up ${delay}`}
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      className={`glass rounded-2xl p-5 relative overflow-hidden animate-fade-up hover-lift hover-glow ${delay} ${onClick ? 'cursor-pointer' : ''}`}
     >
       {/* corner blob */}
       <div className={`absolute top-0 right-0 w-20 h-20 rounded-bl-full opacity-[0.07] ${c.blob}`} />
@@ -37,7 +40,7 @@ export default function KpiCard({ label, value, change, up, icon, color, delay }
       </div>
 
       <p className="text-[11.5px] font-medium text-gray-500 tracking-wide mb-1">{label}</p>
-      <p className="font-display text-[26px] font-bold text-[#1a1d2e] leading-none tracking-tight">{value}</p>
+      <p className="font-display text-[26px] font-bold text-kpi leading-none tracking-tight">{value}</p>
 
       <span
         className={`inline-flex items-center gap-1 text-[11px] font-medium mt-2 px-2 py-0.5 rounded-full ${

@@ -67,6 +67,49 @@ export const usersData = [
   { id: 5, name: 'Tom Becker',    email: 't.becker@helix.ai',  initials: 'TB', avatarColor: '#06b6d4', plan: 'Pro',        mrr: '$490',   status: 'inactive'},
 ]
 
+export const productData = [
+  {
+    id: 1,
+    name: 'Enterprise Suite',
+    desc: 'Full enterprise offering with SSO and SLA',
+    status: 'active',
+    subscribers: 1240,
+    mrr: 48200,
+    price: 249,
+    team: 'Platform',
+  },
+  {
+    id: 2,
+    name: 'CRM Platform',
+    desc: 'Customer management and pipeline tools',
+    status: 'active',
+    subscribers: 960,
+    mrr: 21600,
+    price: 79,
+    team: 'Revenue',
+  },
+  {
+    id: 3,
+    name: 'Analytics API',
+    desc: 'Data APIs and reporting services',
+    status: 'beta',
+    subscribers: 420,
+    mrr: 9800,
+    price: 49,
+    team: 'Data',
+  },
+  {
+    id: 4,
+    name: 'Marketing AI',
+    desc: 'Automation tools for campaigns',
+    status: 'active',
+    subscribers: 640,
+    mrr: 15200,
+    price: 89,
+    team: 'Growth',
+  },
+]
+
 export const activityData = [
   { id: 1, type: 'upgrade',  text: 'Acme Corp upgraded to Enterprise',           time: '2 min ago'  },
   { id: 2, type: 'payment',  text: '$3,200 payment received from Arc Co.',        time: '14 min ago' },
@@ -82,8 +125,6 @@ export const navItems = [
   { label: 'Users',      icon: 'Users',            active: false },
   { label: 'Revenue',    icon: 'CreditCard',       active: false },
   { label: 'Products',   icon: 'Package',          active: false },
-  { label: 'Pipelines',  icon: 'GitBranch',        active: false },
   { label: 'Alerts',     icon: 'Bell',             active: false },
   { label: 'Settings',   icon: 'Settings',         active: false },
-  { label: 'Support',    icon: 'HelpCircle',       active: false },
 ]

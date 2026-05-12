@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Line, ComposedChart,
+  Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Line, ComposedChart,
 } from 'recharts'
-import { revenueData } from '../data'
+import { productData, revenueData, usersData } from '../data'
+import { useAdminData } from '../context/useAdminData'
 
 const PERIODS = ['1W', '1M', '6M', '1Y']
 
@@ -26,7 +27,21 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 export default function RevenueChart() {
   const [period, setPeriod] = useState('1Y')
-  const data = revenueData.slice(-sliceMap[period])
+  const { metrics } = useAdminData()
+
+  const data = useMemo(() => {
+    const baselineRevenue =
+      productData.reduce((total, product) => total + Number(product.mrr || 0), 0) +
+      usersData.reduce((total, user) => total + Number(String(user.mrr || '').replace(/[^0-9.-]/g, '')) || 0, 0)
+
+    const scale = baselineRevenue > 0 ? metrics.totalTrackedRevenue / baselineRevenue : 1
+
+    return revenueData.slice(-sliceMap[period]).map((entry) => ({
+      ...entry,
+      mrr: Math.round(entry.mrr * scale),
+      target: Math.round(entry.target * scale),
+    }))
+  }, [metrics.totalTrackedRevenue, period])
 
   return (
     <div className="glass rounded-2xl p-5 animate-fade-up delay-1">

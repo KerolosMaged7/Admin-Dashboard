@@ -25,11 +25,9 @@ export default function UsersPage() {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [planFilter, setPlanFilter] = useState('all')
-  const [selected, setSelected] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingUser, setEditingUser] = useState(null)
   const [form, setForm] = useState(emptyForm)
-  const [selectedIds, setSelectedIds] = useState([])
 
   const filteredUsers = useMemo(() => {
     return users.filter((user) =>
@@ -38,13 +36,6 @@ export default function UsersPage() {
       (planFilter === 'all' || user.plan === planFilter)
     )
   }, [search, users, statusFilter, planFilter])
-
-  const selectedUsers = useMemo(
-    () => users.filter((user) => selectedIds.includes(user.id)),
-    [selectedIds, users]
-  )
-
-  const allVisibleSelected = filteredUsers.length > 0 && filteredUsers.every((user) => selectedIds.includes(user.id))
 
   function openCreate() {
     setEditingUser(null)
@@ -94,44 +85,10 @@ export default function UsersPage() {
     if (!confirmed) return
 
     deleteUser(user.id)
-    setSelectedIds((current) => current.filter((id) => id !== user.id))
-    if (selected?.id === user.id) setSelected(null)
   }
 
   function handleDuplicate(user) {
     duplicateUser(user.id)
-  }
-
-  function toggleUser(id) {
-    setSelectedIds((current) =>
-      current.includes(id) ? current.filter((item) => item !== id) : [...current, id]
-    )
-  }
-
-  function toggleVisibleUsers() {
-    setSelectedIds((current) => {
-      if (allVisibleSelected) {
-        return current.filter((id) => !filteredUsers.some((user) => user.id === id))
-      }
-
-      const next = new Set(current)
-      filteredUsers.forEach((user) => next.add(user.id))
-      return [...next]
-    })
-  }
-
-  function bulkUpdateStatus(status) {
-    selectedUsers.forEach((user) => updateUser(user.id, { status }))
-    setSelectedIds([])
-  }
-
-  function bulkDelete() {
-    const confirmed = window.confirm(`Delete ${selectedUsers.length} selected users? This cannot be undone.`)
-    if (!confirmed) return
-
-    selectedUsers.forEach((user) => deleteUser(user.id))
-    setSelectedIds([])
-    setSelected(null)
   }
 
   function exportUsers(rows) {
@@ -149,7 +106,7 @@ export default function UsersPage() {
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h2 className="text-xl font-semibold">Users Management</h2>
-          <p className="muted text-sm mt-1">Create, edit, duplicate, and remove users from one place.</p>
+          <p className="muted text-sm mt-1">Create, edit, and search users from one place.</p>
         </div>
 
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -197,36 +154,10 @@ export default function UsersPage() {
         </div>
       </div>
 
-      {selectedIds.length > 0 && (
-        <div className="glass rounded-2xl p-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <p className="muted text-sm">{selectedIds.length} user{selectedIds.length > 1 ? 's' : ''} selected.</p>
-          <div className="flex flex-wrap gap-2">
-            <button onClick={() => bulkUpdateStatus('active')} className="px-3 py-2 rounded-lg bg-white/5 font-medium">
-              Mark active
-            </button>
-            <button onClick={() => bulkUpdateStatus('trial')} className="px-3 py-2 rounded-lg bg-white/5 font-medium">
-              Mark trial
-            </button>
-            <button onClick={() => bulkUpdateStatus('inactive')} className="px-3 py-2 rounded-lg bg-white/5 font-medium">
-              Mark inactive
-            </button>
-            <button onClick={() => exportUsers(selectedUsers)} className="px-3 py-2 rounded-lg bg-white/5 font-medium">
-              Export selected
-            </button>
-            <button onClick={bulkDelete} className="px-3 py-2 rounded-lg bg-red-500/10 text-red-400 font-medium">
-              Delete selected
-            </button>
-          </div>
-        </div>
-      )}
-
       <div className="overflow-auto glass p-4">
         <table className="w-full table-auto text-left">
           <thead>
             <tr className="text-sm muted">
-              <th className="py-2 pr-2 w-10">
-                <input type="checkbox" checked={allVisibleSelected} onChange={toggleVisibleUsers} />
-              </th>
               <th className="py-2">Name</th>
               <th className="py-2">Email</th>
               <th className="py-2">Plan</th>
@@ -237,12 +168,8 @@ export default function UsersPage() {
           </thead>
           <tbody className="divide-y divide-white/6">
             {filteredUsers.map((user) => {
-              const isSelected = selectedIds.includes(user.id)
               return (
-                <tr key={user.id} className={`align-middle ${isSelected ? 'bg-white/5' : 'hover:bg-white/5'}`}>
-                  <td className="py-3 pr-2 align-top">
-                    <input type="checkbox" checked={isSelected} onChange={() => toggleUser(user.id)} />
-                  </td>
+                <tr key={user.id} className="align-middle hover:bg-white/5">
                   <td className="py-3">
                     <div className="font-medium">{user.name}</div>
                     <div className="text-sm muted hidden md:block">{user.email}</div>
@@ -257,9 +184,6 @@ export default function UsersPage() {
                   </td>
                   <td className="py-3">
                     <div className="flex flex-wrap items-center gap-2">
-                      <button onClick={() => setSelected(user)} className="text-sm px-3 py-1 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/30 hover-press">
-                        Details
-                      </button>
                       <button onClick={() => openEdit(user)} className="text-sm px-3 py-1 rounded-lg bg-white/5 hover:bg-white/10 hover-press">
                         Edit
                       </button>
@@ -284,28 +208,6 @@ export default function UsersPage() {
           />
         )}
       </div>
-
-      {selected && (
-        <div className="p-4 rounded-2xl glass hover-lift">
-          <h3 className="font-semibold mb-2">{selected.name} — Details</h3>
-          <p className="text-sm muted mb-2">Email: {selected.email}</p>
-          <p className="text-sm muted">Plan: {selected.plan} • MRR: {selected.mrr}</p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <button onClick={() => openEdit(selected)} className="px-3 py-1 rounded-lg bg-indigo-500/20 text-[#1a1d2e] font-medium hover-press">
-              Edit user
-            </button>
-            <button onClick={() => handleDuplicate(selected)} className="px-3 py-1 rounded-lg bg-white/5 hover-press">
-              Duplicate
-            </button>
-            <button onClick={() => handleDelete(selected)} className="px-3 py-1 rounded-lg bg-red-500/10 text-red-400 hover-press">
-              Delete
-            </button>
-            <button onClick={() => setSelected(null)} className="px-3 py-1 rounded-lg bg-white/5 hover-press">
-              Close
-            </button>
-          </div>
-        </div>
-      )}
 
       {isModalOpen && (
         <Modal

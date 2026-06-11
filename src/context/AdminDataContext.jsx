@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import { activityData as seedActivity, productData as seedProducts, usersData as seedUsers } from '../data'
 import { AdminDataContext } from './AdminContext'
 
@@ -18,6 +18,18 @@ function debouncedSetItem(key, value) {
   _writeTimers.set(key, t)
 }
 
+function clearStoredState() {
+  if (typeof window === 'undefined') return
+
+  Object.values(STORAGE_KEYS).forEach((key) => {
+    try {
+      window.localStorage.removeItem(key)
+    } catch {
+      // ignore storage errors
+    }
+  })
+}
+
 const STORAGE_KEYS = {
   users: 'admin-dashboard-users',
   products: 'admin-dashboard-products',
@@ -27,7 +39,37 @@ const STORAGE_KEYS = {
   settings: 'admin-dashboard-settings',
 }
 
+function isDemoMode() {
+  if (typeof window === 'undefined') return false
+
+  try {
+    const params = new URLSearchParams(window.location.search)
+    const demoParam = params.get('demo')
+    if (demoParam && demoParam !== '0' && demoParam.toLowerCase() !== 'false') return true
+  } catch {
+    // ignore invalid URLs
+  }
+
+  return import.meta.env.VITE_DEMO_MODE === 'true'
+}
+
+function cloneSeedData(data) {
+  return JSON.parse(JSON.stringify(data))
+}
+
+function buildSeedSnapshot() {
+  return {
+    users: cloneSeedData(seedUsers),
+    products: cloneSeedData(seedProducts),
+    activity: cloneSeedData(seedActivity),
+    deletedUsers: [],
+    deletedProducts: [],
+  }
+}
+
 function buildInitialUsers() {
+  if (isDemoMode()) return cloneSeedData(seedUsers)
+
   if (typeof window === 'undefined') return seedUsers
 
   try {
@@ -39,6 +81,8 @@ function buildInitialUsers() {
 }
 
 function buildInitialProducts() {
+  if (isDemoMode()) return cloneSeedData(seedProducts)
+
   if (typeof window === 'undefined') return seedProducts
 
   try {
@@ -81,6 +125,8 @@ function sumMoney(items, selector) {
 }
 
 function buildInitialActivity() {
+  if (isDemoMode()) return cloneSeedData(seedActivity)
+
   if (typeof window === 'undefined') return seedActivity
 
   try {
@@ -92,6 +138,8 @@ function buildInitialActivity() {
 }
 
 function buildInitialDeletedUsers() {
+  if (isDemoMode()) return []
+
   if (typeof window === 'undefined') return []
 
   try {
@@ -103,6 +151,8 @@ function buildInitialDeletedUsers() {
 }
 
 function buildInitialDeletedProducts() {
+  if (isDemoMode()) return []
+
   if (typeof window === 'undefined') return []
 
   try {
@@ -146,26 +196,35 @@ export function AdminDataProvider({ children }) {
   const [deletedProducts, setDeletedProducts] = useState(buildInitialDeletedProducts)
   const [history, setHistory] = useState([])
   const [future, setFuture] = useState([])
+  const demoMode = isDemoMode()
+  
+  // Use ref to track last activity time and counter for unique IDs
+  const activityIdRef = useRef({ lastTime: 0, counter: 0 })
 
   useEffect(() => {
+    if (demoMode) return
     debouncedSetItem(STORAGE_KEYS.users, users)
-  }, [users])
+  }, [demoMode, users])
 
   useEffect(() => {
+    if (demoMode) return
     debouncedSetItem(STORAGE_KEYS.products, products)
-  }, [products])
+  }, [demoMode, products])
 
   useEffect(() => {
+    if (demoMode) return
     debouncedSetItem(STORAGE_KEYS.activity, activity)
-  }, [activity])
+  }, [demoMode, activity])
 
   useEffect(() => {
+    if (demoMode) return
     debouncedSetItem(STORAGE_KEYS.deletedUsers, deletedUsers)
-  }, [deletedUsers])
+  }, [demoMode, deletedUsers])
 
   useEffect(() => {
+    if (demoMode) return
     debouncedSetItem(STORAGE_KEYS.deletedProducts, deletedProducts)
-  }, [deletedProducts])
+  }, [demoMode, deletedProducts])
 
   const captureSnapshot = () => ({
     users,
@@ -211,9 +270,21 @@ export function AdminDataProvider({ children }) {
   }, [users, products, deletedUsers, deletedProducts])
 
   const recordActivity = (type, text) => {
+    const now = Date.now()
+    
+    // Generate unique ID: if same millisecond as last activity, add counter
+    if (now === activityIdRef.current.lastTime) {
+      activityIdRef.current.counter++
+    } else {
+      activityIdRef.current.lastTime = now
+      activityIdRef.current.counter = 0
+    }
+    
+    const uniqueId = now + activityIdRef.current.counter * 0.001
+
     setActivity((current) => [
       {
-        id: Date.now(),
+        id: uniqueId,
         type,
         text,
         time: 'Just now',
@@ -471,6 +542,14 @@ export function AdminDataProvider({ children }) {
     setFuture(rest)
   }
 
+  const resetDemoData = () => {
+    const snapshot = buildSeedSnapshot()
+    clearStoredState()
+    setHistory([])
+    setFuture([])
+    restoreSnapshot(snapshot)
+  }
+
   const value = {
     users,
     products,
@@ -480,6 +559,8 @@ export function AdminDataProvider({ children }) {
     metrics,
     canUndo: history.length > 0,
     canRedo: future.length > 0,
+    demoMode,
+    resetDemoData,
     addUser,
     updateUser,
     deleteUser,

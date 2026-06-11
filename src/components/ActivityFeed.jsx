@@ -1,5 +1,6 @@
 import { ArrowUpCircle, CreditCard, UserPlus, AlertCircle, Database } from 'lucide-react'
 import { useAdminData } from '../context/useAdminData'
+import EmptyState from './common/EmptyState'
 
 const typeConfig = {
   upgrade: { icon: ArrowUpCircle, bg: 'bg-amber-50',   text: 'text-amber-500'  },
@@ -21,13 +22,13 @@ export default function ActivityFeed() {
           <p className="text-[11px] text-gray-400 mt-0.5">Live event stream</p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={undo} disabled={!canUndo} className="text-[11px] font-medium text-gray-400 hover:text-gray-600 disabled:opacity-40 transition-colors">
+          <button onClick={undo} disabled={!canUndo} className="theme-button rounded-full px-2.5 py-1 text-[11px] font-medium disabled:opacity-40 transition-colors focus-ring">
             Undo
           </button>
-          <button onClick={redo} disabled={!canRedo} className="text-[11px] font-medium text-gray-400 hover:text-gray-600 disabled:opacity-40 transition-colors">
+          <button onClick={redo} disabled={!canRedo} className="theme-button rounded-full px-2.5 py-1 text-[11px] font-medium disabled:opacity-40 transition-colors focus-ring">
             Redo
           </button>
-          <button onClick={clearActivity} className="text-[11px] font-medium text-gray-400 hover:text-gray-600 transition-colors">
+          <button onClick={clearActivity} className="theme-button-danger rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors focus-ring">
             Clear log
           </button>
           <span className="flex items-center gap-1.5 text-[11px] font-medium text-emerald-500">
@@ -39,7 +40,10 @@ export default function ActivityFeed() {
 
       <div className="flex flex-col">
         {items.length === 0 ? (
-          <p className="text-[11px] text-gray-400">No activity yet.</p>
+          <EmptyState
+            title="Nothing has happened yet"
+            description="As you manage users, products, and updates, the activity feed will fill with the latest events."
+          />
         ) : items.map((item, i) => {
           const cfg = typeConfig[item.type]
           const Icon = cfg.icon

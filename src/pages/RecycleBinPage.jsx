@@ -1,17 +1,14 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import EmptyState from '../components/common/EmptyState'
 import { useAdminData } from '../context/useAdminData'
 
 export default function RecycleBinPage() {
   const { deletedUsers, deletedProducts, restoreUser, restoreProduct, purgeUser, purgeProduct, metrics } = useAdminData()
-  const [scope, setScope] = useState('all')
-
   const rows = useMemo(() => {
     const userRows = deletedUsers.map((item) => ({ ...item, type: 'user' }))
     const productRows = deletedProducts.map((item) => ({ ...item, type: 'product' }))
-    const merged = [...userRows, ...productRows]
-    return scope === 'all' ? merged : merged.filter((item) => item.type === scope)
-  }, [deletedProducts, deletedUsers, scope])
+    return [...userRows, ...productRows]
+  }, [deletedProducts, deletedUsers])
 
   return (
     <div className="space-y-4">
@@ -33,14 +30,6 @@ export default function RecycleBinPage() {
           <p className="text-[11px] muted-sm">Deleted products</p>
           <p className="text-2xl font-semibold theme-text mt-1">{deletedProducts.length}</p>
         </div>
-      </div>
-
-      <div className="glass rounded-2xl p-3 flex flex-col sm:flex-row gap-1.5">
-        <select value={scope} onChange={(e) => setScope(e.target.value)} className="theme-input rounded-lg px-3 py-2 text-sm">
-          <option value="all">All items</option>
-          <option value="user">Users</option>
-          <option value="product">Products</option>
-        </select>
       </div>
 
       {rows.length === 0 ? (

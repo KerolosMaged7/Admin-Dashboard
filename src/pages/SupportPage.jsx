@@ -64,14 +64,6 @@ export default function SupportPage() {
     recordActivity('upgrade', `${target.status === 'open' ? 'Resolved' : 'Reopened'} ticket: ${target.subject}`)
   }
 
-  function removeTicket(id) {
-    const target = tickets.find((ticket) => ticket.id === id)
-    if (!target) return
-
-    save(tickets.filter((ticket) => ticket.id !== id))
-    recordActivity('alert', `Deleted ticket: ${target.subject}`)
-  }
-
   return (
     <div className="space-y-4 max-w-3xl">
       <div>
@@ -111,15 +103,9 @@ export default function SupportPage() {
               <button onClick={() => toggleStatus(ticket.id)} className="theme-button rounded-lg px-3 py-1.5 text-sm">
                 {ticket.status === 'open' ? 'Resolve' : 'Reopen'}
               </button>
-              <button onClick={() => removeTicket(ticket.id)} className="theme-button-danger rounded-lg px-3 py-1.5 text-sm">Delete</button>
             </div>
           </div>
         ))}
-      </div>
-
-      <div className="glass rounded-xl p-4">
-        <p className="font-medium">Contact</p>
-        <p className="text-sm muted mt-1">support@admin-dashboard.com</p>
       </div>
     </div>
   )

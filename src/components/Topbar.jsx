@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Bell, Calendar, Menu } from 'lucide-react'
+import { Bell, Calendar, Menu, Search } from 'lucide-react'
 import { useAdminData } from '../context/useAdminData'
 
 const READ_ACTIVITY_STORAGE_KEY = 'admin-dashboard-read-activity-ids'
@@ -29,8 +29,8 @@ function buildInitialDismissedIds() {
   }
 }
 
-export default function Topbar({ activeNav, setActiveNav, mobileMenuOpen, setMobileMenuOpen }) {
-  const { activity } = useAdminData()
+export default function Topbar({ activeNav, setActiveNav, mobileMenuOpen, setMobileMenuOpen, onOpenCommandPalette }) {
+  const { activity, demoMode, resetDemoData } = useAdminData()
   const [dateFormat, setDateFormat] = useState('long')
   const [isDateOpen, setIsDateOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
@@ -82,10 +82,10 @@ export default function Topbar({ activeNav, setActiveNav, mobileMenuOpen, setMob
 
   function getNotificationTarget(item) {
     const text = item.text.toLowerCase()
-    if (text.includes('timezone') || text.includes('dark mode') || text.includes('settings')) return 'Settings'
+    if (text.includes('timezone') || text.includes('dark mode') || text.includes('settings')) return 'Audit Log'
     if (text.includes('user') || text.includes('trial') || text.includes('signup') || text.includes('sign-up')) return 'Users'
     if (text.includes('product') || text.includes('mrr') || text.includes('revenue')) return 'Products'
-    if (text.includes('alert')) return 'Alerts'
+    if (text.includes('alert')) return 'Audit Log'
     return 'Dashboard'
   }
 
@@ -120,7 +120,7 @@ export default function Topbar({ activeNav, setActiveNav, mobileMenuOpen, setMob
         <div className="flex items-center gap-2">
           <button
             onClick={() => setMobileMenuOpen((current) => !current)}
-            className="md:hidden w-9 h-9 rounded-xl glass flex items-center justify-center hover:bg-white/70 transition-colors"
+            className="md:hidden w-9 h-9 rounded-xl glass flex items-center justify-center hover:bg-white/70 transition-colors focus-ring"
             aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
           >
             <Menu size={16} className="text-gray-500" />
@@ -132,13 +132,33 @@ export default function Topbar({ activeNav, setActiveNav, mobileMenuOpen, setMob
         <p className="text-[12px] text-gray-400 mt-1">Welcome back, Kerolos - here's what's happening.</p>
       </div>
       <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+        {demoMode && (
+          <button
+            type="button"
+            onClick={resetDemoData}
+            className="hidden sm:inline-flex items-center gap-2 text-[12px] text-emerald-700 glass rounded-full px-3.5 py-1.5 focus-ring bg-emerald-50/80 dark:bg-emerald-500/15 dark:text-emerald-200"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            Reset demo data
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={onOpenCommandPalette}
+          className="hidden md:flex items-center gap-2 text-[12px] text-gray-500 glass rounded-full px-3.5 py-1.5 focus-ring"
+          aria-label="Open search palette"
+        >
+          <Search size={12} className="text-indigo-400" />
+          <span>Search</span>
+          <span className="rounded-full bg-white/40 px-1.5 py-0.5 text-[10px] text-gray-600 dark:bg-white/10 dark:text-white/55">Ctrl K</span>
+        </button>
         <div className="relative">
           <button
             onClick={() => {
               setIsDateOpen((current) => !current)
               setIsNotificationsOpen(false)
             }}
-            className="flex items-center gap-1.5 text-[12px] text-gray-500 glass rounded-full px-3.5 py-1.5"
+            className="flex items-center gap-1.5 text-[12px] text-gray-500 glass rounded-full px-3.5 py-1.5 focus-ring"
           >
             <Calendar size={12} className="text-indigo-400" />
             {today}
@@ -172,14 +192,14 @@ export default function Topbar({ activeNav, setActiveNav, mobileMenuOpen, setMob
               setIsNotificationsOpen((current) => !current)
               setIsDateOpen(false)
             }}
-            className="relative w-9 h-9 rounded-xl glass flex items-center justify-center hover:bg-white/70 transition-colors"
+            className="relative w-9 h-9 rounded-xl glass flex items-center justify-center hover:bg-white/70 transition-colors focus-ring"
           >
-          <Bell size={16} className="text-gray-500" />
-          {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-indigo-500 text-white text-[10px] leading-4 text-center">
-              {unreadCount}
-            </span>
-          )}
+            <Bell size={16} className="text-gray-500" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-indigo-500 text-white text-[10px] leading-4 text-center">
+                {unreadCount}
+              </span>
+            )}
           </button>
 
           {isNotificationsOpen && (

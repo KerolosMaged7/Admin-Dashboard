@@ -125,6 +125,5 @@ export const navItems = [
   { label: 'Users',      icon: 'Users',            active: false },
   { label: 'Revenue',    icon: 'CreditCard',       active: false },
   { label: 'Products',   icon: 'Package',          active: false },
-  { label: 'Alerts',     icon: 'Bell',             active: false },
-  { label: 'Settings',   icon: 'Settings',         active: false },
+  { label: 'Audit Log',  icon: 'ScrollText',       active: false },
 ]

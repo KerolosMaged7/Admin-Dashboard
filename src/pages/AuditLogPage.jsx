@@ -4,26 +4,24 @@ import { useAdminData } from '../context/useAdminData'
 
 function getRelatedPage(entry) {
   const text = entry.text.toLowerCase()
-  if (text.includes('timezone') || text.includes('dark mode') || text.includes('settings')) return 'Settings'
+  if (text.includes('timezone') || text.includes('dark mode') || text.includes('settings')) return 'Audit Log'
   if (text.includes('user') || text.includes('trial')) return 'Users'
   if (text.includes('product') || text.includes('revenue') || text.includes('mrr')) return 'Products'
   if (text.includes('ticket') || text.includes('support')) return 'Support'
-  if (text.includes('alert')) return 'Alerts'
+  if (text.includes('alert')) return 'Audit Log'
   return 'Dashboard'
 }
 
 export default function AuditLogPage({ setActiveNav }) {
   const { activity } = useAdminData()
   const [search, setSearch] = useState('')
-  const [typeFilter, setTypeFilter] = useState('all')
 
   const filtered = useMemo(() => {
     return activity.filter((item) => {
       const matchSearch = `${item.text} ${item.time}`.toLowerCase().includes(search.toLowerCase())
-      const matchType = typeFilter === 'all' || item.type === typeFilter
-      return matchSearch && matchType
+      return matchSearch
     })
-  }, [activity, search, typeFilter])
+  }, [activity, search])
 
   return (
     <div className="space-y-4">
@@ -54,14 +52,6 @@ export default function AuditLogPage({ setActiveNav }) {
           className="theme-input rounded-lg px-3 py-2 flex-1 text-sm"
           placeholder="Search the log"
         />
-        <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className="theme-input rounded-lg px-3 py-2 text-sm">
-          <option value="all">All types</option>
-          <option value="user">Users</option>
-          <option value="data">Data</option>
-          <option value="alert">Alerts</option>
-          <option value="upgrade">Upgrades</option>
-          <option value="payment">Payments</option>
-        </select>
       </div>
 
       {filtered.length === 0 ? (
@@ -80,7 +70,7 @@ export default function AuditLogPage({ setActiveNav }) {
                 <p className="text-xs muted mt-0.5">{item.time} • {item.type}</p>
               </div>
               <button onClick={() => setActiveNav?.(getRelatedPage(item))} className="theme-button rounded-lg px-3 py-1 text-xs whitespace-nowrap">
-                Open related
+                  Open related
               </button>
             </div>
           ))}

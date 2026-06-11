@@ -24,13 +24,16 @@ const colorMap = {
 export default function KpiCard({ label, value, change, up, icon, color, delay, onClick }) {
   const Icon = iconMap[icon]
   const c = colorMap[color]
+  const Component = onClick ? 'button' : 'div'
 
   return (
-    <div
+    <Component
+      type={onClick ? 'button' : undefined}
       onClick={onClick}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
-      className={`glass rounded-2xl p-5 relative overflow-hidden animate-fade-up hover-lift hover-glow ${delay} ${onClick ? 'cursor-pointer' : ''}`}
+      aria-label={onClick ? `Open ${label}` : undefined}
+      className={`glass rounded-2xl p-5 relative overflow-hidden animate-fade-up hover-lift hover-glow focus-ring surface-elevated text-left w-full ${delay} ${onClick ? 'cursor-pointer' : ''}`}
     >
       {/* corner blob */}
       <div className={`absolute top-0 right-0 w-20 h-20 rounded-bl-full opacity-[0.07] ${c.blob}`} />
@@ -50,6 +53,6 @@ export default function KpiCard({ label, value, change, up, icon, color, delay, 
         {up ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
         {change}
       </span>
-    </div>
+    </Component>
   )
 }

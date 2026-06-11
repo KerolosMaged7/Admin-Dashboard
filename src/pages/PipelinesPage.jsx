@@ -29,7 +29,7 @@ function formatMoney(value) {
 export default function PipelinesPage() {
   const { recordActivity } = useAdminData()
   const [deals, setDeals] = useState(buildInitialDeals)
-  const [form, setForm] = useState({ account: '', value: '', stage: 'Lead Review' })
+  const [form, setForm] = useState({ account: '', value: '' })
 
   const totals = useMemo(() => {
     const totalValue = deals.reduce((sum, deal) => sum + Number(deal.value || 0), 0)
@@ -48,10 +48,10 @@ export default function PipelinesPage() {
     const value = Number(form.value || 0)
     if (!account || value <= 0) return
 
-    const next = [{ id: Date.now(), account, value, stage: form.stage }, ...deals]
+    const next = [{ id: Date.now(), account, value, stage: 'Lead Review' }, ...deals]
     save(next)
     recordActivity('data', `Created pipeline deal ${account}`)
-    setForm({ account: '', value: '', stage: 'Lead Review' })
+    setForm({ account: '', value: '' })
   }
 
   function advanceDeal(id) {
@@ -65,17 +65,6 @@ export default function PipelinesPage() {
     const next = deals.map((deal) => (deal.id === id ? { ...deal, stage: nextStage } : deal))
     save(next)
     recordActivity('upgrade', `${target.account} moved to ${nextStage}`)
-  }
-
-  function removeDeal(id) {
-    const target = deals.find((deal) => deal.id === id)
-    if (!target) return
-
-    const confirmed = window.confirm(`Delete ${target.account}?`)
-    if (!confirmed) return
-
-    save(deals.filter((deal) => deal.id !== id))
-    recordActivity('alert', `Deleted pipeline deal ${target.account}`)
   }
 
   return (
@@ -112,16 +101,8 @@ export default function PipelinesPage() {
           className="theme-input rounded-lg px-3 py-2"
           placeholder="Deal value"
         />
-        <select
-          value={form.stage}
-          onChange={(e) => setForm((current) => ({ ...current, stage: e.target.value }))}
-          className="theme-input rounded-lg px-3 py-2"
-        >
-          {stageOrder.map((stage) => (
-            <option key={stage} value={stage}>{stage}</option>
-          ))}
-        </select>
-        <button type="submit" className="theme-button-primary rounded-lg px-4 py-2 font-medium h-[42px]">Add</button>
+        <div className="hidden md:block" />
+        <button type="submit" className="theme-button-primary rounded-lg px-4 py-2 font-medium h-[42px]">Add deal</button>
       </form>
 
       <div className="space-y-2">
@@ -133,7 +114,6 @@ export default function PipelinesPage() {
             </div>
             <div className="flex gap-2">
               <button onClick={() => advanceDeal(deal.id)} disabled={deal.stage === 'Closed Deal'} className="theme-button rounded-lg px-3 py-1.5 text-sm disabled:opacity-40">Advance</button>
-              <button onClick={() => removeDeal(deal.id)} className="theme-button-danger rounded-lg px-3 py-1.5 text-sm">Delete</button>
             </div>
           </div>
         ))}

@@ -1,21 +1,26 @@
 import {
   LayoutDashboard, BarChart2, Users, CreditCard, Package,
-  Bell, Settings,
+  ScrollText,
 } from 'lucide-react'
-import { useState } from 'react'
+import { ChevronRight } from 'lucide-react'
 import { navItems } from '../data'
 
-const iconMap = { LayoutDashboard, BarChart2, Users, CreditCard, Package, Bell, Settings }
+const iconMap = {
+  LayoutDashboard,
+  BarChart2,
+  Users,
+  CreditCard,
+  Package,
+  ScrollText,
+}
 
 const NAV_GROUPS = [
-  { label: 'Main',    items: navItems.slice(0, 4) },
-  { label: 'Product', items: navItems.slice(4, 7) },
-  { label: null, items: navItems.slice(7) },
+  { label: 'Main', items: navItems.slice(0, 4) },
+  { label: 'Product', items: navItems.slice(4, 5) },
+  { label: 'Operations', items: navItems.slice(5) },
 ]
 
 export default function Sidebar({ activeNav, setActiveNav, isOpen, setIsOpen }) {
-  const [photoFailed, setPhotoFailed] = useState(false)
-
   return (
     <>
       {/* Mobile overlay backdrop */}
@@ -36,9 +41,22 @@ export default function Sidebar({ activeNav, setActiveNav, isOpen, setIsOpen }) 
         <div className="absolute bottom-0 right-0 w-36 h-36 rounded-full bg-violet-500/15 blur-3xl pointer-events-none" />
 
         {/* Logo */}
-        <div className="px-6 pt-7 pb-6 flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.9)]" />
-          <span className="font-display font-bold text-[19px] text-white tracking-tight">Admin Dashboard</span>
+        <div className="px-6 pt-7 pb-6 flex items-start justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.9)]" />
+            <div>
+              <span className="block font-display font-bold text-[19px] text-white tracking-tight leading-none">Admin Dashboard</span>
+              <span className="block text-[11px] text-white/45 mt-1">Faster workflows, fewer clicks</span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsOpen(false)}
+            className="md:hidden w-8 h-8 rounded-lg bg-white/5 text-white/70 focus-ring"
+            aria-label="Close navigation"
+          >
+            ×
+          </button>
         </div>
 
       {/* Nav */}
@@ -56,8 +74,10 @@ export default function Sidebar({ activeNav, setActiveNav, isOpen, setIsOpen }) 
               return (
                 <button
                   key={item.label}
+                  type="button"
                   onClick={() => setActiveNav(item.label)}
-                  className={`w-full flex items-center gap-2.5 px-3 py-[8px] rounded-lg text-[13px] mb-0.5 transition-all border-l-2 hover-press hover-shine ${
+                  aria-current={isActive ? 'page' : undefined}
+                  className={`w-full flex items-center gap-2.5 px-3 py-[8px] rounded-lg text-[13px] mb-0.5 transition-all border-l-2 hover-press hover-shine focus-ring ${
                     isActive
                       ? 'bg-indigo-500/20 text-white font-medium border-indigo-500 shadow-[0_0_0_1px_rgba(99,102,241,0.15)]'
                       : 'text-white/55 hover:text-white hover:bg-white/5 border-transparent'
@@ -72,26 +92,29 @@ export default function Sidebar({ activeNav, setActiveNav, isOpen, setIsOpen }) 
         ))}
       </nav>
 
-      {/* Footer */}
       <div className="px-4 py-4 border-t border-white/[0.08]">
-        <div className="flex items-center gap-2.5">
-          {!photoFailed ? (
-            <img
-              src="/profile.jpg"
-              alt="Kerolos Maged"
-              className="w-8 h-8 rounded-full object-cover shrink-0 border border-white/20"
-              onError={() => setPhotoFailed(true)}
-            />
-          ) : (
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center text-[11px] font-semibold text-white shrink-0">
-              KM
-            </div>
-          )}
-          <div>
-            <p className="text-[13px] font-medium text-white leading-tight">Kerolos Maged</p>
-            <p className="text-[11px] text-white/45">Super Admin</p>
+        <button
+          type="button"
+          onClick={() => setActiveNav('Profile')}
+          className="w-full flex items-center gap-2.5 rounded-2xl px-2.5 py-2 text-left hover:bg-white/5 transition-colors focus-ring"
+          aria-label="Open profile page"
+        >
+          <img
+            src="/profile.jpg"
+            alt="Kerolos Maged"
+            className="w-9 h-9 rounded-full object-cover shrink-0 border border-white/20"
+            onError={(event) => {
+              event.currentTarget.style.display = 'none'
+            }}
+          />
+
+          <div className="min-w-0 flex-1">
+            <p className="text-[13px] font-medium text-white leading-tight truncate">Kerolos Maged</p>
+            <p className="text-[11px] text-white/45 truncate">Super Admin</p>
           </div>
-        </div>
+
+          <ChevronRight size={14} className="text-white/45" />
+        </button>
       </div>
       </aside>
     </>
